@@ -3,29 +3,36 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import DataImage from '../public/data_img.png'
 import axios from 'axios';
+import Loader from './components/Loader';
 
 export default function Home() {
 
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const changeEmailValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   }
-  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setLoading(true)
     setErrorMessage('')
     await axios.post("/api/verification_email", { email })
       .then(res => {
         console.log(res.data.verificationCode)
-      }).catch(err => {
+      })
+      .catch(err => {
         if (err.response.status === 401) {
           setErrorMessage(err.response.data.error)
         }
         else {
           console.log(err.message)
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   };
 
@@ -71,7 +78,13 @@ export default function Home() {
                 {errorMessage}
               </p>
             )}
-            <button className={"flex justify-center items-center gap-x-1 bg-blue-500 w-full mt-3 text-white h-11 px-4 rounded-lg focus:outline-none disabled:opacity-75"}>
+            <button
+              className={"flex justify-center items-center gap-x-1 bg-blue-500 w-full mt-3 text-white h-11 px-4 rounded-lg focus:outline-none disabled:opacity-75"}
+              disabled={!!loading}
+            >
+              {loading && (
+                <Loader />
+              )}
               Sign in with Amplify
             </button>
           </form>
