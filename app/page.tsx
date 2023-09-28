@@ -25,26 +25,29 @@ export default function Home() {
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [verificationCodefromApi, setVerificationCodefromApi] = useState('');
+  const [verificationCodefromInput, setVerificationCodefromInput] = useState('');
   const [loading, setLoading] = useState(false);
 
   const changeEmailValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   }
 
+  const changeVerificationCodeValue = (value: string) => {
+    setVerificationCodefromInput(value);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setErrorMessage('')
     if (verificationCodefromApi) {
-      setLoading(false)
+      sendVerificationCode()
       return;
     }
     sendVerificationEmail()
   };
 
   const sendVerificationEmail = async () => {
-    setLoading(true)
-    setErrorMessage('')
     await axios.post("/api/verification_email", { email })
       .then(res => {
         setVerificationCodefromApi(res.data.verificationCode)
@@ -62,6 +65,24 @@ export default function Home() {
         setLoading(false)
       })
   };
+
+  const sendVerificationCode = async () => {
+    await axios.post("/api/verification_code", { verificationCode: verificationCodefromInput })
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        if (err.response.status === 401) {
+          setErrorMessage(err.response.data.error)
+        }
+        else {
+          console.log(err.message)
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
 
   return (
     <div className={`p-4 h-screen bg-[#151619] flex`}>
@@ -94,6 +115,7 @@ export default function Home() {
                 <ReactCodeInput
                   {...codeInputProps}
                   fields={6}
+                  onChange={changeVerificationCodeValue}
                 />
               </div>
             ) : (
