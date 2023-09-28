@@ -5,23 +5,49 @@ import DataImage from '../public/data_img.png'
 import axios from 'axios';
 import Loader from './components/Loader';
 import { toast } from 'react-toastify';
+import ReactCodeInput from 'react-code-input';
+
+const codeInputProps: any = {
+  inputStyle: {
+    margin: '4px',
+    width: '32px',
+    height: '42px',
+    borderRadius: '7px',
+    fontSize: '18px',
+    backgroundColor: 'white',
+    border: '1px solid silver',
+    textAlign: 'center'
+  }
+}
 
 export default function Home() {
 
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [verificationCodefromApi, setVerificationCodefromApi] = useState('');
   const [loading, setLoading] = useState(false);
 
   const changeEmailValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setLoading(true)
+    setErrorMessage('')
+    if (verificationCodefromApi) {
+      setLoading(false)
+      return;
+    }
+    sendVerificationEmail()
+  };
+
+  const sendVerificationEmail = async () => {
     setLoading(true)
     setErrorMessage('')
     await axios.post("/api/verification_email", { email })
       .then(res => {
+        setVerificationCodefromApi(res.data.verificationCode)
         toast.success(`Please enter the following verification code: ${res.data.verificationCode}`);
       })
       .catch(err => {
@@ -60,20 +86,32 @@ export default function Home() {
             Amplify
           </h1>
           <form onSubmit={handleSubmit}>
-            <div className={"relative"}>
-              <span className={"absolute inset-y-0 left-0 flex items-center pl-2"}>
-                <button type="submit" className="p-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#94A3B8" viewBox="0 0 16 16">
-                    <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-.586L16 11.801V4.697l-5.803 3.546Z" />
-                  </svg>
-                </button>
-              </span>
-              <input
-                className={"pl-10 border text-sm rounded-lg block w-full p-2.5"}
-                placeholder="Email"
-                onChange={changeEmailValue}
-              />
-            </div>
+            {!!verificationCodefromApi ? (
+              <div className={`flex justify-center items-center flex-col`}>
+                <p className={`text-xs mb-2`}>
+                  Enter the 6-digit verification code sent to your email
+                </p>
+                <ReactCodeInput
+                  {...codeInputProps}
+                  fields={6}
+                />
+              </div>
+            ) : (
+              <div className={"relative"}>
+                <span className={"absolute inset-y-0 left-0 flex items-center pl-2"}>
+                  <button type="submit" className="p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#94A3B8" viewBox="0 0 16 16">
+                      <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-.586L16 11.801V4.697l-5.803 3.546Z" />
+                    </svg>
+                  </button>
+                </span>
+                <input
+                  className={"pl-10 border text-sm rounded-lg block w-full p-2.5"}
+                  placeholder="Email"
+                  onChange={changeEmailValue}
+                />
+              </div>
+            )}
             {errorMessage && (
               <p className={"flex items-center justify-center font-medium tracking-wide text-red-500 text-sm mt-1 ml-1"}>
                 {errorMessage}
@@ -86,7 +124,10 @@ export default function Home() {
               {loading && (
                 <Loader />
               )}
-              Sign in with Amplify
+              {!!verificationCodefromApi
+                ? 'Submit Verification Code'
+                : 'Sign in with Amplify'
+              }
             </button>
           </form>
         </div>
