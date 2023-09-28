@@ -4,6 +4,7 @@ import Image from 'next/image'
 import DataImage from '../public/data_img.png'
 import axios from 'axios';
 import Loader from './components/Loader';
+import { toast } from 'react-toastify';
 
 export default function Home() {
 
@@ -21,7 +22,7 @@ export default function Home() {
     setErrorMessage('')
     await axios.post("/api/verification_email", { email })
       .then(res => {
-        console.log(res.data.verificationCode)
+        toast.success(`Please enter the following verification code: ${res.data.verificationCode}`);
       })
       .catch(err => {
         if (err.response.status === 401) {
