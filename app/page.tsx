@@ -1,7 +1,34 @@
+"use client"
+import React, { useState } from 'react'
 import Image from 'next/image'
 import DataImage from '../public/data_img.png'
+import axios from 'axios';
 
 export default function Home() {
+
+  const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const changeEmailValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  }
+  
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setErrorMessage('')
+    await axios.post("/api/verification_email", { email })
+      .then(res => {
+        console.log(res.data.verificationCode)
+      }).catch(err => {
+        if (err.response.status === 401) {
+          setErrorMessage(err.response.data.error)
+        }
+        else {
+          console.log(err.message)
+        }
+      })
+  };
+
   return (
     <div className={`p-4 h-screen bg-[#151619] flex`}>
       <div className={`reative w-1/2 p-5 hidden lg:flex flex-col items-center`}>
@@ -24,7 +51,7 @@ export default function Home() {
           <h1 className={`text-center text-2xl font-bold mb-5`}>
             Amplify
           </h1>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className={"relative"}>
               <span className={"absolute inset-y-0 left-0 flex items-center pl-2"}>
                 <button type="submit" className="p-1">
@@ -35,10 +62,15 @@ export default function Home() {
               </span>
               <input
                 className={"pl-10 border text-sm rounded-lg block w-full p-2.5"}
-                type="email"
                 placeholder="Email"
+                onChange={changeEmailValue}
               />
             </div>
+            {errorMessage && (
+              <p className={"flex items-center justify-center font-medium tracking-wide text-red-500 text-sm mt-1 ml-1"}>
+                {errorMessage}
+              </p>
+            )}
             <button className={"flex justify-center items-center gap-x-1 bg-blue-500 w-full mt-3 text-white h-11 px-4 rounded-lg focus:outline-none disabled:opacity-75"}>
               Sign in with Amplify
             </button>
