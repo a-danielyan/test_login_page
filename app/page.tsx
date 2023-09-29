@@ -3,10 +3,10 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import DataImage from '../public/data_img.png'
 import axios from './axios';
-import Loader from './components/Loader';
 import { toast } from 'react-toastify';
 import ReactCodeInput from 'react-code-input';
 import { useRouter } from 'next/navigation'
+import Button from './components/Button';
 
 const codeInputProps: any = {
   inputStyle: {
@@ -146,18 +146,15 @@ export default function Home() {
                 {errorMessage}
               </p>
             )}
-            <button
-              className={"flex justify-center items-center gap-x-1 bg-blue-500 w-full mt-3 text-white h-11 px-4 rounded-lg focus:outline-none disabled:opacity-75"}
+            <Button
               disabled={!!loading}
+              loading={loading}
             >
-              {loading && (
-                <Loader />
-              )}
               {!!verificationCodefromApi
                 ? 'Submit Verification Code'
                 : 'Sign in with Amplify'
               }
-            </button>
+            </Button>
           </form>
         </div>
       </div>
