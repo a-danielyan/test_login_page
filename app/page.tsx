@@ -6,6 +6,7 @@ import axios from './axios';
 import Loader from './components/Loader';
 import { toast } from 'react-toastify';
 import ReactCodeInput from 'react-code-input';
+import { useRouter } from 'next/navigation'
 
 const codeInputProps: any = {
   inputStyle: {
@@ -21,6 +22,8 @@ const codeInputProps: any = {
 }
 
 export default function Home() {
+
+  const router = useRouter()
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [verificationCodefromApi, setVerificationCodefromApi] = useState('');
@@ -72,8 +75,8 @@ export default function Home() {
     }
 
     await axios.post("/api/verification_code", body)
-      .then(res => {
-        console.log(res)
+      .then(_ => {
+        router.push('/posts')
       })
       .catch(err => {
         if (err.response.status === 401) {
