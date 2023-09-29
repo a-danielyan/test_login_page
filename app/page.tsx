@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import DataImage from '../public/data_img.png'
-import axios from 'axios';
+import axios from './axios';
 import Loader from './components/Loader';
 import { toast } from 'react-toastify';
 import ReactCodeInput from 'react-code-input';
@@ -21,7 +21,6 @@ const codeInputProps: any = {
 }
 
 export default function Home() {
-
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [verificationCodefromApi, setVerificationCodefromApi] = useState('');
@@ -67,7 +66,12 @@ export default function Home() {
   };
 
   const sendVerificationCode = async () => {
-    await axios.post("/api/verification_code", { verificationCode: verificationCodefromInput })
+    const body = {
+      verificationCode: verificationCodefromInput,
+      email
+    }
+
+    await axios.post("/api/verification_code", body)
       .then(res => {
         console.log(res)
       })
